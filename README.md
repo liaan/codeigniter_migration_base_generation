@@ -1,11 +1,8 @@
-codeigniter_migration_base_generation
-=====================================
-
---Create a Base Migration File from current DB
+#Create a Base Migration File from current DB
 
 
 
-When all goes well it will create a file under migrations called 001_create_base.php
+When all goes well it will create a file under migrations called 001_create_base.php under your migrations folder
 
 
 #To use:
