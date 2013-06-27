@@ -9,7 +9,9 @@ When all goes well it will create a file under migrations called 001_create_base
 
 1: Enable migrations and set version to 1;
 
-2: In controller:
+2: Copy VpxMigration.php to your library folder (/application/library)
+
+3: In controller:
 
 
     function make_base(){
