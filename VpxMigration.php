@@ -219,15 +219,14 @@ class VpxMigration {
             $up .= '        ##  Create Table'."\n";
             foreach ($columns as $column)
             {
-                $up .= '                $this->dbforge->add_field("' . "`$column[Field]` $column[Type] " . ($column['Null'] == 'NO' ? 'NOT NULL' : 'NULL') .($column['Default']? 'DEFAULT '.$column['Default']:'')." $column[Extra]\");"."\n";
+                $up .= '                $this->dbforge->add_field("' . "`$column[Field]` $column[Type] " . ($column['Null'] == 'NO' ? 'NOT NULL' : 'NULL') .($column['Default']? ' DEFAULT \''.$column['Default'].'\'':'')." $column[Extra]\");"."\n";
                 if ($column['Key'] == 'PRI')
                     $up .= '                $this->dbforge->add_key("' . $column['Field'] . '",true);'."\n";
             }
-            $up .= '                $this->dbforge->create_table("' . $table . '", TRUE);
-            ';
+            $up .= '                $this->dbforge->create_table("' . $table . '", TRUE);'."\n";
 
-            $down .= '###  Drop table ##
-                $this->dbforge->drop_table("' . $table . '", TRUE);';
+            $down .= '          ###  Drop table ##'."\n";
+            $down .= '          $this->dbforge->drop_table("' . $table . '", TRUE);'."\n";
 
             /* clear some mem */
             $q->free_result();
@@ -242,10 +241,10 @@ class VpxMigration {
         $return .= $up;
         $return .= "\n".'   }'."\n";
 
-        $return .= "\n".'   public function down()
-            {
-                ' . $down . '."\n"
-            }'."\n".'}';
+        $return .= "\n".'   public function down()';
+        $return .= '{' ."\n";
+        $return .= $down . "\n";
+        $return .=  '     }'."\n".'}';
 
         ## write the file, or simply return if write_file false
         if ($this->write_file)
