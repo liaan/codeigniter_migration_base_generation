@@ -1,15 +1,18 @@
-<?php if (!defined('BASEPATH')) exit('No direct script access allowed');
+<?php
+
+if (!defined('BASEPATH'))
+    exit('No direct script access allowed');
 
 /**
-* Vpx Migration Library
-*
-* Create a base file for migrations to start off with;
-*
-* @author Liaan vd Merwe <info@vpx.co.za>
-* @license Free to use and abuse
-* @version 0.2 Beta
-*
-*/
+ * Vpx Migration Library
+ *
+ * Create a base file for migrations to start off with;
+ *
+ * @author Liaan vd Merwe <info@vpx.co.za>
+ * @license Free to use and abuse
+ * @version 0.3 Beta
+ *
+ */
 class VpxMigration {
 
     var $db_user;
@@ -27,8 +30,9 @@ class VpxMigration {
     var $add_view = false;
 
     /*
-    * defaults;
-    */
+     * defaults;
+     */
+
     function __construct($params = null) {
         // parent::__construct();
         isset($this->ci) OR $this->ci = get_instance();
@@ -41,13 +45,13 @@ class VpxMigration {
         if ($params)
             $this->init_config($params);
     }
-    
+
     /**
-    * Init Config if there is any passed
-    *
-    *
-    * @param type $params
-    */
+     * Init Config if there is any passed
+     *
+     *
+     * @param type $params
+     */
     function init_config($params = array()) { //apply config
         if (count($params) > 0)
         {
@@ -62,11 +66,11 @@ class VpxMigration {
     }
 
     /**
-    * Generate the file.
-    *
-    * @param string $tables
-    * @return boolean|string
-    */
+     * Generate the file.
+     *
+     * @param string $tables
+     * @return boolean|string
+     */
     function generate($tables = null) {
         if ($tables)
             $this->tables = $tables;
@@ -197,31 +201,38 @@ class VpxMigration {
             log_message('debug', print_r($table, true));
 
             $q = $this->ci->db_master->query('describe ' . $this->ci->db_master->protect_identifiers($this->ci->db_master->database . '.' . $table));
-
             // No result means the table name was invalid
             if ($q === FALSE)
             {
                 continue;
             }
 
-
-            $i = 0;
-
             $columns = $q->result_array();
-            //$count = count($colums);
+
+            $q = $this->ci->db_master->query(' SHOW TABLE STATUS WHERE Name = \'' . $table . '\'');
+            $engines = $q->row_array();
 
 
             $up .= "\n\t\t" . '## Create Table ' . $table . "\n";
             foreach ($columns as $column)
             {
-                $up .= "\t\t" . '$this->dbforge->add_field("' . "`$column[Field]` $column[Type] " . ($column['Null'] == 'NO' ? 'NOT NULL' : 'NULL') .($column['Default']? ' DEFAULT \''.$column['Default'].'\'':'')." $column[Extra]\");"."\n";
-                if ($column['Key'] == 'PRI')
-                    $up .= "\t\t" . '$this->dbforge->add_key("' . $column['Field'] . '",true);'."\n";
-            }
-            $up .= "\t\t" . '$this->dbforge->create_table("' . $table . '", TRUE);'."\n";
+                $up .= "\t\t" . '$this->dbforge->add_field("' . "`$column[Field]` $column[Type] " . ($column['Null'] == 'NO' ? 'NOT NULL' : 'NULL') .
+                        (
+                        #  if its timestamp column, don't '' around default value .... crap way, but should work for now
+                        $column['Default'] ? ' DEFAULT ' . ($column['Type'] == 'timestamp' ? $column['Default'] : '\'' . $column['Default'] . '\'') : ''
+                        )
+                        . " $column[Extra]\");" . "\n";
 
-            $down .= "\t\t" . '### Drop table ' . $table . ' ##'."\n";
-            $down .= "\t\t" . '$this->dbforge->drop_table("' . $table . '", TRUE);'."\n";
+                if ($column['Key'] == 'PRI')
+                    $up .= "\t\t" . '$this->dbforge->add_key("' . $column['Field'] . '",true);' . "\n";
+            }
+            $up .= "\t\t" . '$this->dbforge->create_table("' . $table . '", TRUE);' . "\n";
+            if (isset($engines['Engine']) and $engines['Engine'])
+                $up .= "\t\t" . '$this->db_master->query(\'ALTER TABLE  ' . $this->ci->db_master->protect_identifiers($this->ci->db_master->database . '.' . $table) . ' ENGINE = ' . $engines['Engine']. '\')';
+
+
+            $down .= "\t\t" . '### Drop table ' . $table . ' ##' . "\n";
+            $down .= "\t\t" . '$this->dbforge->drop_table("' . $table . '", TRUE);' . "\n";
 
             /* clear some mem */
             $q->free_result();
@@ -229,17 +240,17 @@ class VpxMigration {
 
         ### generate the text ##
         $return .= '<?php ';
-        $return .= 'defined(\'BASEPATH\') OR exit(\'No direct script access allowed\');'."\n\n";
-        $return .= 'class Migration_create_base extends CI_Migration {'."\n";
-        $return .= "\n\t" . 'public function up() {'."\n";
+        $return .= 'defined(\'BASEPATH\') OR exit(\'No direct script access allowed\');' . "\n\n";
+        $return .= 'class Migration_create_base extends CI_Migration {' . "\n";
+        $return .= "\n\t" . 'public function up() {' . "\n";
 
         $return .= $up;
-        $return .= "\n\t".' }'."\n";
+        $return .= "\n\t" . ' }' . "\n";
 
-        $return .= "\n\t".'public function down()';
-        $return .= "\t" . '{' ."\n";
+        $return .= "\n\t" . 'public function down()';
+        $return .= "\t" . '{' . "\n";
         $return .= $down . "\n";
-        $return .= "\t" . '}'."\n".'}';
+        $return .= "\t" . '}' . "\n" . '}';
 
         ## write the file, or simply return if write_file false
         if ($this->write_file)
