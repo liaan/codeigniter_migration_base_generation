@@ -1,19 +1,15 @@
-<?php
-
-if (!defined('BASEPATH'))
-    exit('No direct script access allowed');
+<?php if (!defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
- * Vpx Migration Library
- *
- * Create a base file for migrations to start off with;
- *
- * @author      Liaan vd Merwe <info@vpx.co.za>
-
- * @license     Free to use and abuse
- * @version     0.1 Beta
- *
- */
+* Vpx Migration Library
+*
+* Create a base file for migrations to start off with;
+*
+* @author Liaan vd Merwe <info@vpx.co.za>
+* @license Free to use and abuse
+* @version 0.2 Beta
+*
+*/
 class VpxMigration {
 
     var $db_user;
@@ -31,8 +27,8 @@ class VpxMigration {
     var $add_view = false;
 
     /*
-     * defaults;
-     */
+* defaults;
+*/
 
     function __construct($params = null) {
         // parent::__construct();
@@ -47,12 +43,12 @@ class VpxMigration {
             $this->init_config($params);
     }
     /**
-     * Init Config if there is any passed
-     *
-     *
-     * @param type $params
-     */
-    function init_config($params = array()) {    //apply config
+* Init Config if there is any passed
+*
+*
+* @param type $params
+*/
+    function init_config($params = array()) { //apply config
         if (count($params) > 0)
         {
             foreach ($params as $key => $val)
@@ -66,11 +62,11 @@ class VpxMigration {
     }
 
     /**
-     * Generate the file.
-     *
-     * @param string $tables
-     * @return boolean|string
-     */
+* Generate the file.
+*
+* @param string $tables
+* @return boolean|string
+*/
 
     function generate($tables = null) {
         if ($tables)
@@ -216,42 +212,42 @@ class VpxMigration {
             //$count = count($colums);
 
 
-            $up .= '        ##  Create Table'."\n";
+            $up .= "\n\t\t" . '## Create Table ' . $table . "\n";
             foreach ($columns as $column)
             {
-                $up .= '                $this->dbforge->add_field("' . "`$column[Field]` $column[Type] " . ($column['Null'] == 'NO' ? 'NOT NULL' : 'NULL') .($column['Default']? ' DEFAULT \''.$column['Default'].'\'':'')." $column[Extra]\");"."\n";
+                $up .= "\t\t" . '$this->dbforge->add_field("' . "`$column[Field]` $column[Type] " . ($column['Null'] == 'NO' ? 'NOT NULL' : 'NULL') .($column['Default']? ' DEFAULT \''.$column['Default'].'\'':'')." $column[Extra]\");"."\n";
                 if ($column['Key'] == 'PRI')
-                    $up .= '                $this->dbforge->add_key("' . $column['Field'] . '",true);'."\n";
+                    $up .= "\t\t" . '$this->dbforge->add_key("' . $column['Field'] . '",true);'."\n";
             }
-            $up .= '                $this->dbforge->create_table("' . $table . '", TRUE);'."\n";
+            $up .= "\t\t" . '$this->dbforge->create_table("' . $table . '", TRUE);'."\n";
 
-            $down .= '          ###  Drop table ##'."\n";
-            $down .= '          $this->dbforge->drop_table("' . $table . '", TRUE);'."\n";
+            $down .= "\t\t" . '### Drop table ' . $table . ' ##'."\n";
+            $down .= "\t\t" . '$this->dbforge->drop_table("' . $table . '", TRUE);'."\n";
 
             /* clear some mem */
             $q->free_result();
         }
 
-        ###  generate the text ##
-        $return .= '<?php'."\n";
-        $return .= 'defined(\'BASEPATH\') OR exit(\'No direct script access allowed\');'."\n";
+        ### generate the text ##
+        $return .= '<?php ';
+        $return .= 'defined(\'BASEPATH\') OR exit(\'No direct script access allowed\');'."\n\n";
         $return .= 'class Migration_create_base extends CI_Migration {'."\n";
-        $return .= '    public function up() {'."\n";
+        $return .= "\n\t" . 'public function up() {'."\n";
 
         $return .= $up;
-        $return .= "\n".'   }'."\n";
+        $return .= "\n\t".' }'."\n";
 
-        $return .= "\n".'   public function down()';
-        $return .= '{' ."\n";
+        $return .= "\n\t".'public function down()';
+        $return .= "\t" . '{' ."\n";
         $return .= $down . "\n";
-        $return .=  '     }'."\n".'}';
+        $return .= "\t" . '}'."\n".'}';
 
         ## write the file, or simply return if write_file false
         if ($this->write_file)
         {
             fwrite($file, $return);
             fclose($file);
-            return true;
+            return "Create file migration with success!";
         } else
         {
             return $return;
