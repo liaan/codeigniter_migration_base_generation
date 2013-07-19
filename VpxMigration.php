@@ -27,9 +27,8 @@ class VpxMigration {
     var $add_view = false;
 
     /*
-* defaults;
-*/
-
+    * defaults;
+    */
     function __construct($params = null) {
         // parent::__construct();
         isset($this->ci) OR $this->ci = get_instance();
@@ -42,12 +41,13 @@ class VpxMigration {
         if ($params)
             $this->init_config($params);
     }
+    
     /**
-* Init Config if there is any passed
-*
-*
-* @param type $params
-*/
+    * Init Config if there is any passed
+    *
+    *
+    * @param type $params
+    */
     function init_config($params = array()) { //apply config
         if (count($params) > 0)
         {
@@ -62,12 +62,11 @@ class VpxMigration {
     }
 
     /**
-* Generate the file.
-*
-* @param string $tables
-* @return boolean|string
-*/
-
+    * Generate the file.
+    *
+    * @param string $tables
+    * @return boolean|string
+    */
     function generate($tables = null) {
         if ($tables)
             $this->tables = $tables;
@@ -247,7 +246,8 @@ class VpxMigration {
         {
             fwrite($file, $return);
             fclose($file);
-            return "Create file migration with success!";
+            echo "Create file migration with success!";
+            return true;
         } else
         {
             return $return;
