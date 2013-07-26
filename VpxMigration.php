@@ -228,7 +228,7 @@ class VpxMigration {
             }
             $up .= "\t\t" . '$this->dbforge->create_table("' . $table . '", TRUE);' . "\n";
             if (isset($engines['Engine']) and $engines['Engine'])
-                $up .= "\t\t" . '$this->db_master->query(\'ALTER TABLE  ' . $this->ci->db_master->protect_identifiers($this->ci->db_master->database . '.' . $table) . ' ENGINE = ' . $engines['Engine']. '\')';
+                $up .= "\t\t" . '$this->db->query(\'ALTER TABLE  ' . $this->ci->db_master->protect_identifiers($table) . ' ENGINE = ' . $engines['Engine']. '\');';
 
 
             $down .= "\t\t" . '### Drop table ' . $table . ' ##' . "\n";
