@@ -10,7 +10,7 @@ if (!defined('BASEPATH'))
  *
  * @author Liaan vd Merwe <info@vpx.co.za>
  * @license Free to use and abuse
- * @version 0.3 Beta
+ * @version 0.4 Beta
  *
  */
 class VpxMigration {
